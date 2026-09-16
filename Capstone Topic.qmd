@@ -1,6 +1,6 @@
 ---
 title: "Capstone Topic"
-format: html
+format: pdf
 editor: visual
 ---
 

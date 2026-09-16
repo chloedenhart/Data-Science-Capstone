@@ -1,0 +1,31 @@
+---
+title: "Annotated Bilbliography"
+format: pdf
+editor: visual
+---
+
+### Buggle, J., Mayer, T., Sakalli, S. O., & Thoenig, M. (2023). The Refugee's Dilemma: Evidence from Jewish Migration out of Nazi Germany. Quarterly Journal of Economics, 138(2), 1273–1345.
+
+In 2021, 89.3 million people were forcibly displaced as a result of persecution, conflict, mass killings and other forms of violence. We do not have a precise understanding on the process behind the decision to emigrate at the individual level oin a violent context. Beyond case studies and anecdotes, these questions remain overlooked from a causal and quantitative perspective. Lack of systematic evidence is worrying given the high policy relevance of the link between conflicts and migration as exemplified by recent waves of refugees fleeing Syria and Ukraine.
+
+I will use Buggle et als data-construction and model-specification approach as a direct template, adapted to the aggregate country-year data available for the 1945–1952 Displaced Persons period.
+
+Dataset
+https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/2CGZ3Q
+
+### Spitzer, Y. (2014). Pogroms, Networks, and Migration: The Jewish Migration from the Russian Empire to the United States, 1881–1914.
+
+Spitzer builds a geo-located dataset linking Jewish migrants and pogram locations to test whether anti-Jewish violence or the diffusion of pre-existing migration networks bnetter explains the timing and the geographic pattern of emigration from the Russian Empire. He finds that network diuffusion, more than the pograms themselves drove the spread of mass migration. This is a valuable comparison point for my research quesyion as it suggest that threat and network explanations for migration timinh can be distinguished. 
+
+### Balderas, J. U., & Greenwood, M. J. (2010). From Europe to the Americas: A Comparative Panel-Data Analysis of Migration to Argentina, Brazil, and the United States, 1870–1910. Journal of Population Economics, 23(4), 1301–1318.
+
+Using annual panel data and a Hausman-Taylor insturmental-variable approach, the authors estimate and compare the determ,inanats of teh European emigration to Argentina, Brazil and the US, finding that origin-country wages and the existing stock of immigrants from the same origin in the destination country are key drivers, with some determinants offering meaningfully across the three destinations. I will use this papers econometrc approach to destination choice as a reference for modeling how DPs chose the United States, Israel/Palestine, and Latin American destinations.
+
+### Data Source: International Refugee Organization, Annual Reports (1947–1951); supplemented by the JDC Archives' IRO series (1947–1954) and National Archives Record Group 59 resettlement files.
+
+My primary data source is the IRO's own annual reports, which provide year-by-year counts of refugees resettled by destination country during the Displaced Persons period. I will supplement this aggregate country-year panel with materials from the JDC Archives' digitized IRO series and, where digitized copies are available, National Archives files specifically covering resettlement policy in Latin American countries. Together these sources let me construct the country-year panel of resettlement flows and policy shifts needed for an event-study design, without requiring individual-level archival access.
+
+#### Note on data availability
+
+There's no ready-made dataset for this like there was for Buggle et al.'s pre-war study — the sources above are reports and archival documents, not clean data files. I'll need to manually pull the resettlement numbers out of them and build my own spreadsheet, which I'm still working out the exact scope of with my advisor. If that ends up being too time-consuming, IPUMS census data for Argentina/Brazil is a backup option that comes as a ready-to-use dataset.
+
