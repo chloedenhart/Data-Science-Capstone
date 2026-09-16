@@ -8,9 +8,9 @@ editor: visual
 
 My capstone aims to analyze the post-Holocaust outflow of Jewish migrants by creating an extension of Buggle et al.'s research on The Refugee's Dilemma: Evidence from Jewish Migration out of Nazi Germany. I will aim to answer the questions:
 
--   How do Holocaust survivors factor in continued threats to personal security in the post-war period, and at which point are they ready to leave the displaced persons camps behind?
+-   How did Holocaust survivors factor in continued threats to personal security in the post-war period, and at which point are they ready to leave the displaced persons camps behind?
 
--   How do migration policies in potential destination countries affect their prospects for resettlement out of displaced persons camps?
+-   How did migration policies in potential destination countries affect their prospects for resettlement out of displaced persons camps?
 
 These questions remain overlooked from a causal and quantitative perspective for the post-war period specifically. I would like to analyze this from an econometric lens, following Buggle et al.'s approach of modeling the timing of migration decisions and simulating how different destination policies would have changed outcomes.
 
