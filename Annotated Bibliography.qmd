@@ -29,3 +29,16 @@ My primary data source is the IRO's own annual reports, which provide year-by-ye
 
 There's no ready-made dataset for this like there was for Buggle et al.'s pre-war study — the sources above are reports and archival documents, not clean data files. I'll need to manually pull the resettlement numbers out of them and build my own spreadsheet, which I'm still working out the exact scope of with my advisor. If that ends up being too time-consuming, IPUMS census data for Argentina/Brazil is a backup option that comes as a ready-to-use dataset.
 
+Can I get access to the German Federal Archives, which was instructed by the federal government in 2004 to create a “scientifically established direc- tory of all Jewish residents in the German Reich 1933–1945
+
+### Other Articles
+https://journals.sagepub.com/doi/10.1177/0022009410366556 
+
+### Other data set options
+- transcripts from USC VHA
+
+### Interesting Stories to Highlight
+- Rachel Kriegel
+
+
+
