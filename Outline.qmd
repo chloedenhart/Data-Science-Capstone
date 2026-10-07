@@ -1,0 +1,46 @@
+---
+title: "Outline"
+subtitle: "The Refugee's Second Dilemma: Migration Decisions Among Holocaust Survivors in Displaced Persons Camps, 1945–1952"
+format: pdf
+editor: visual
+---
+
+## I. Introduction & Motivation
+
+Displacement, threat, and migration policy remain among the most consequential issues facing the world today, and understanding how these dynamics played out historically sharpens how we think about them in the present. I will start by introducing key themes from Buggle, Mayar, Sakalli, and Thoenig's "The Refugee's Dilemma" as the direct precedent for this kind of work. This project aims to pick up where Buggle et al. left off, as their paper takes data from during the war, and mine takes data from after the war. The period after liberation, when survivors still faced and unresolved question of when to leave and where to go. From there, I will lay out the two questions guiding this project:
+
+1.  How do Holocaust survivors factor in continued threats to personal security in the post-war period, and at which point are they ready to leave Europe behind?
+
+2.  How do migration policies in potential destination countries, as described by survivors themselves, shape their resettlement experience?
+
+The second motivation behind this project is that the generation of Holocaust survivors is passing, and this project treats their testimonies as source data that can reveal patterns the stories themselves cannot tell.
+
+## II. Background & Related Literature
+
+This section explains where the projects methods come from and why these specific questions have not been studied before. I will walk through how Buggle et al. built and analyzed their data, and then I give the historical background needed to understand the post-war period: the International Refugee Organization's (IRO) role, the major DP camps, the 1948 U.S Displaced Persons Act, and Israeli independence in 1948. Finally, I show how little quantitative research exists on this topic, both on conflict-driven migration and on this specific post-war period. I will do this by reviewing quantitative papers that do exist, including Spitzer's work on pogroms and migration networks and Balderas and Greenwood's work on Latin American destination choice.
+
+## III. Data & Data Collection
+
+In this section I will explain how I built my dataset since no dataset like this exists for the post-war period. I collected individual-level data from USC Shoah Foundation Visual History Archive testimony transcripts. I will explain how I filtered testimonies for relevance, how I organized the collection process, and how I will use regex-based extraction in R to pull structured variables out of unstructured first-person narrative. I will include a broader `post_war_situation` variable (DP camp, hiding until liberation, fled independently, etc.), since some survivors in my sample were never in a camp at all. I also extract destination, departure timing, self-reported policy/organization mentions (visas, quotas, sponsors, HIAS, IRO), and threat or decision language. I will explain why building this dataset from scratch is the main computational contribution of this project
+
+## IV. Visualizations
+
+This section shows what the dataset looks like before any formal modeling. I will include a map of destination countries compared with maps of where survivors were before and during the war. I also hope to zoom in on individual stories to create personalized maps. I will also include a breakdown of post-war situations across the sample, a timeline of departures relative to to known policy landmarks (the 1948 U.S. Displaced Persons Act and Israeli independence), and a breakdown of how often different policy mechanisms are mentioned across testimonies. These visualizations let the patterns in the data speak on their own, even if the regression analysis in the next section take longer than I hope to finish.
+
+## V. Analysis
+
+Here I explain what regression analysis I was able to run, time permitting. For example, whether threat language in a testimony is associated with a shorter time before departure, or whether departures cluster differently before versus after the two known policy landmarks. This section depends on how much time the data collection leaves me, I also plan to further research policy landmarks depending on the spread of destination countries.
+
+## VI. Ethical Considerations
+
+I address two things here. First, the responsibility of turning someones personal survivor testimony into structured data. The tension between analyzing testimony computationally and honoring it as someones account of their own trauma. Second, the responsibility of drawing lessons for today from this history carefully, without using survivors stories to make a modern argument they never agreed to be a part of.
+
+## VII. Discussion & Contemporary Relevance
+
+I will bring this project back to where it started: using what the data shows (visualized, and modeled where possible) to say something real about how threat and policy shaped people's decisions, and connecting that back to why this history still matters for how the world handles displacement today.
+
+## VIII. Conclusion & Limitations
+
+This project is a hand-collected, non-random sample of testimony given decades after the fact, with data collection as the main achievement and analysis as exploratory rather than final. Question 2 is answered using self-reported policy mentions and a small number of landmark dates, not a full constructed policy timeline, which limits how precisely I can isolate policy effects. I will close with the next steps beyond this project, like pursuing access to the to a larger, more representative data like that done in Buggle et al.
+
+### Disclaimer
