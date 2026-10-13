@@ -1,0 +1,343 @@
+---
+title: "Extracting Variables from VHA Testimony Transcripts"
+format:
+  html:
+    code-fold: true
+    embed-resources: true
+execute:
+  warning: false
+  message: false
+---
+
+## Setup
+
+```{r}
+# Load tidyverse: dplyr (data wrangling), stringr (text/regex), purrr (map),
+# readr (read/write files), ggplot2 (plots), tibble, tidyr
+library(tidyverse)
+
+# Make every ggplot use a clean, minimal look
+theme_set(theme_minimal(base_size = 12))
+```
+
+## 1. Read the transcripts
+
+One `.txt` file per testimony in a `Testimonies/` folder. The file name (minus extension) becomes `person_id`.
+
+```{r}
+# List every file path inside the Testimonies folder
+files <- list.files("Testimonies", full.names = TRUE)
+
+# Drop anything that is a sub-folder rather than a file
+files <- files[!dir.exists(files)]
+
+testimonies <- tibble(
+  # person_id = file name without the folder or ".txt"; str_trim removes stray spaces
+  person_id = str_trim(tools::file_path_sans_ext(basename(files))),
+  # text = the full contents of each file, as one long string per person
+  text      = map_chr(files, read_file)
+) |>
+  mutate(
+    # Collapse all line breaks / repeated spaces into single spaces so regexes
+    # can match phrases that were split across lines in the transcript
+    text_clean = str_replace_all(text, "\\s+", " "),
+    # Rough length of each transcript in words
+    word_count = str_count(text_clean, "\\w+")
+  )
+
+# How many testimonies were loaded? (should be ~101)
+nrow(testimonies)
+```
+
+## 2. Keyword dictionaries
+
+Each entry is a regex (a text pattern). `|` means "or". Everything is matched case-insensitively. These are first drafts: expect to edit them after the validation step below.
+
+```{r}
+# ---- Destination countries -------------------------------------------------
+# Name on the left = short label that ends up in the data.
+# Text on the right = the words that count as a mention of that country.
+destinations <- c(
+  # "(?<!South |Latin |...)America" means: the word America, but NOT when it
+  # follows "South ", "Latin ", "Central " or "North "
+  us           = "United States|U\\.S\\.|the States|(?<!South |Latin |Central |North )America\\b",
+  israel       = "Israel|Palestine",
+  canada       = "Canada",
+  australia    = "Australia",
+  argentina    = "Argentina",
+  brazil       = "Brazil",
+  venezuela    = "Venezuela",
+  uk           = "England|Britain|United Kingdom",
+  france       = "France",
+  sweden       = "Sweden",
+  south_africa = "South Africa"
+)
+
+# ---- Movement language -----------------------------------------------------
+# Words people use to describe going somewhere. Survivors rarely say
+# "I emigrated"; they say "we went to", "I left Poland for", "we moved to".
+# \\b = word boundary, so "go" does not match inside "good".
+move_phrase <- paste0(
+  "(emigrat\\w*|immigrat\\w*|\\bmov(e|ed|ing)\\b|\\bwent\\b|\\bgo(ing)?\\b|",
+  "\\bgone\\b|\\bcame\\b|\\bcom(e|ing)\\b|sail\\w*|arriv\\w*|travel\\w*|",
+  "\\bleft\\b|\\bleav(e|ing)\\b|settl\\w*|ended up|relocat\\w*|\\bfled\\b|\\bflew\\b)"
+)
+
+# ---- Other dictionaries ----------------------------------------------------
+# One list holding five groups of keywords. Each group becomes a set of
+# count columns (e.g. policy_visa = how many times "visa" appears).
+dictionaries <- list(
+  # Where the person was after the war
+  situation = c(
+    dp_camp    = "displaced persons|DP camp|D\\.P\\.|F(ö|oe)hrenwald|Landsberg|Feldafing|Zeilsheim|Pocking|Deggendorf|Ebelsberg",
+    hiding     = "\\bhid\\b|hiding|hidden",
+    liberation = "liberat"
+  ),
+  # Aid organizations
+  org = c(
+    hias          = "\\bHIAS\\b",
+    jdc           = "\\bthe Joint\\b|\\bJDC\\b|Joint Distribution",
+    iro           = "\\bIRO\\b|International Refugee Organization",
+    unrra         = "\\bUNRRA\\b",
+    jewish_agency = "Jewish Agency",
+    red_cross     = "Red Cross"
+  ),
+  # Immigration policy mechanisms
+  policy = c(
+    quota       = "\\bquota",
+    visa        = "\\bvisas?\\b",
+    affidavit   = "affidavit",
+    sponsor     = "sponsor",
+    certificate = "certificate",
+    dp_act      = "Displaced Persons Act",
+    consulate   = "consulate|immigration (law|office|policy|restriction)"
+  ),
+  # Language about continued threat / fear
+  threat = c(
+    fear         = "afraid|fear|scared|terrif",
+    pogrom       = "pogrom|Kielce",
+    unsafe       = "not safe|unsafe|danger",
+    antisemitism = "anti-?semit|hatred"
+  ),
+  # Language about making a decision to leave
+  decision = c(
+    decided   = "we decided|I decided|decided to",
+    no_choice = "no choice|had to leave|couldn't stay|could not stay",
+    waited    = "waited|waiting",
+    wanted    = "wanted to leave|wanted to go|we chose|I chose"
+  )
+)
+
+# Safety check: stop with a clear message if the list above didn't load properly
+stopifnot(is.list(dictionaries), all(c("situation", "org", "policy", "threat", "decision") %in% names(dictionaries)))
+```
+
+## 3. Extract variables
+
+```{r}
+# ---- Helper 1: count_dict ---------------------------------------------------
+# For every pattern in a dictionary, count how many times it appears in each
+# transcript. Returns one column per pattern, named "<prefix>_<pattern name>".
+count_dict <- function(text, dict, prefix) {
+  map(dict, \(p) str_count(text, regex(p, ignore_case = TRUE))) |>  # count matches per pattern
+    as_tibble() |>                                                   # list -> table
+    rename_with(\(x) paste0(prefix, "_", x))                         # add prefix to column names
+}
+
+# ---- Helper 2: top_label ----------------------------------------------------
+# Given a table of counts (rows = people, columns = categories), return the
+# name of the column with the largest count for each person.
+# If every count is 0, return NA (no match).
+top_label <- function(df) {
+  m <- as.matrix(df)
+  ifelse(rowSums(m) == 0, NA_character_, colnames(m)[max.col(m, ties.method = "first")])
+}
+
+# ---- Destination ------------------------------------------------------------
+# (a) Any mention of each country, anywhere in the text. Columns: mention_us, ...
+dest_any <- count_dict(testimonies$text_clean, destinations, "mention")
+
+# (b) A country mentioned within 80 characters AFTER a movement word.
+#     Catches "we went to Canada", "I left Poland for Argentina", "moved to the States".
+#     ".{0,80}?" = up to 80 of any characters, as few as possible.
+dest_move <- map(destinations, \(p) {
+  str_count(testimonies$text_clean,
+            regex(paste0(move_phrase, ".{0,80}?(", p, ")"), ignore_case = TRUE))
+}) |> as_tibble()
+
+# Best guess #1: country with the most movement-phrase matches
+dest_moved    <- top_label(dest_move)
+
+# Best guess #2 (fallback): most-mentioned country overall, with "mention_" removed
+dest_fallback <- top_label(dest_any) |> str_remove("^mention_")
+
+# ---- Years ------------------------------------------------------------------
+# A post-war year = 1945 to 1955.  19(4[5-9]|5[0-5]) means 194[5-9] or 195[0-5].
+postwar_year <- "\\b(19(4[5-9]|5[0-5]))\\b"
+
+# Departure word, then up to 80 characters in the same sentence, then a post-war year.
+# Catches "we emigrated to the U.S. in 1949."
+departure_re <- "(emigrat\\w*|immigrat\\w*|left|went|moved|sailed|arrived|came to|leave)[^.?!]{0,80}?\\b(19(4[5-9]|5[0-5]))\\b"
+
+# Same idea, year first: "In 1949 we left for America."
+departure_re_before <- "\\b(19(4[5-9]|5[0-5]))\\b[^.?!]{0,60}?(emigrat\\w*|immigrat\\w*|left|went|moved|sailed|leave)"
+
+# For each transcript: every distinct post-war year mentioned, as whole numbers
+years_all <- str_extract_all(testimonies$text_clean, postwar_year) |>
+  map(\(y) as.integer(unique(y)))
+
+# ---- Post-war situation patterns (used in the case_when below) ---------------
+dp_camp_re <- dictionaries$situation[["dp_camp"]]
+hiding_re  <- dictionaries$situation[["hiding"]]
+
+# ---- Build the final dataset ------------------------------------------------
+testimony_data <- testimonies |>
+  # Attach all the keyword-count columns side by side
+  bind_cols(
+    count_dict(testimonies$text_clean, dictionaries$situation, "sit"),
+    count_dict(testimonies$text_clean, dictionaries$org,       "org"),
+    count_dict(testimonies$text_clean, dictionaries$policy,    "policy"),
+    count_dict(testimonies$text_clean, dictionaries$threat,    "threat"),
+    count_dict(testimonies$text_clean, dictionaries$decision,  "decision"),
+    dest_any
+  ) |>
+  mutate(
+    # Destination: movement-phrase match first; otherwise most-mentioned country
+    destination = coalesce(dest_moved, dest_fallback),
+
+    # Which method produced the destination (filter on this to be strict)
+    destination_source = case_when(
+      !is.na(dest_moved)    ~ "movement phrase",
+      !is.na(dest_fallback) ~ "most mentioned",
+      TRUE                  ~ NA_character_
+    ),
+
+    # Earliest and latest post-war year mentioned (NA if none)
+    first_postwar_yr = map_int(years_all, \(y) if (length(y)) min(y) else NA_integer_),
+    last_postwar_yr  = map_int(years_all, \(y) if (length(y)) max(y) else NA_integer_),
+
+    # Departure year: try "departure word ... year", else "year ... departure word"
+    # str_match(...)[, 3] pulls the year out of the 3rd bracket group of the first
+    # pattern; [, 2] the 2nd bracket group of the second pattern
+    departure_year = coalesce(
+      as.integer(str_match(text_clean, regex(departure_re, ignore_case = TRUE))[, 3]),
+      as.integer(str_match(text_clean, regex(departure_re_before, ignore_case = TRUE))[, 2])
+    ),
+
+    # Post-war situation: DP camp words first, then hiding words, else unclear
+    post_war_situation = case_when(
+      str_detect(text_clean, regex(dp_camp_re, ignore_case = TRUE)) ~ "DP camp",
+      str_detect(text_clean, regex(hiding_re,  ignore_case = TRUE)) ~ "Hiding / other",
+      TRUE                                                          ~ "Unclear"
+    ),
+
+    # Total threat words, and threat words per 1,000 words (adjusts for length)
+    threat_total   = rowSums(pick(starts_with("threat_"))),
+    threat_per_1k  = threat_total / word_count * 1000,
+
+    # Total decision-language words
+    decision_total = rowSums(pick(starts_with("decision_"))),
+
+    # TRUE if the person mentions any policy term / any aid organization
+    any_policy     = rowSums(pick(starts_with("policy_"))) > 0,
+    any_org        = rowSums(pick(starts_with("org_"))) > 0
+  )
+
+# Quick look at the key columns
+glimpse(select(testimony_data, person_id, destination, destination_source,
+               departure_year, post_war_situation, threat_per_1k, any_policy, any_org))
+
+# How many destinations came from each method?
+testimony_data |> count(destination, destination_source)
+```
+
+## 4. Validate before you trust it
+
+The key step. Pick 5-10 testimonies, read the matches in context, and fix the regexes. `kwic()` shows each match with surrounding text.
+
+```{r}
+# kwic = "key word in context": prints each match with `width` characters of
+# surrounding text on each side, for one person
+kwic <- function(id, pattern, width = 80) {
+  txt <- testimonies$text_clean[testimonies$person_id == id]   # that person's text
+  str_extract_all(txt, regex(paste0(".{0,", width, "}(", pattern, ").{0,", width, "}"),
+                             ignore_case = TRUE))[[1]]
+}
+
+# Examples (remove the # and swap in a real person_id and any pattern):
+# kwic(testimonies$person_id[1], destinations[["us"]])
+# kwic(testimonies$person_id[1], paste0(move_phrase, ".{0,80}?(", destinations[["us"]], ")"))
+# kwic(testimonies$person_id[1], departure_re)
+# kwic(testimonies$person_id[1], dictionaries$policy[["visa"]])
+```
+
+## 5. Add metadata and save
+
+Expects `testimony_index.csv` with `person_id` (matching the file name exactly), `birth_year`, `birthplace`, `interview_date`.
+
+```{r}
+# Only merge metadata if you have made the index file
+if (file.exists("testimony_index.csv")) {
+  index <- read_csv("testimony_index.csv") |>
+    mutate(person_id = str_trim(person_id))     # remove stray spaces so IDs match
+  testimony_data <- left_join(testimony_data, index, by = "person_id")
+}
+
+# Save the dataset WITHOUT the full transcript text (keeps the file small and
+# keeps survivors' words out of any shared file)
+testimony_data |>
+  select(-text, -text_clean) |>
+  write_csv("testimony_data.csv")
+```
+
+## 6. First visualizations
+
+```{r}
+#| label: fig-destinations
+# Bar chart: number of testimonies per destination country
+testimony_data |>
+  filter(!is.na(destination)) |>              # drop people with no destination found
+  count(destination) |>                       # count rows per destination
+  ggplot(aes(n, reorder(destination, n))) +   # sort bars by size
+  geom_col(fill = "#2C5282") +
+  labs(title = "Where survivors say they went",
+       x = "Number of testimonies", y = NULL)
+```
+
+```{r}
+#| label: fig-situation
+# Bar chart: DP camp vs hiding vs unclear
+testimony_data |>
+  count(post_war_situation) |>
+  ggplot(aes(n, reorder(post_war_situation, n))) +
+  geom_col(fill = "#2C5282") +
+  labs(title = "Post-war situation described", x = "Number of testimonies", y = NULL)
+```
+
+```{r}
+#| label: fig-departures
+# Timeline: how many testimonies report leaving in each year
+testimony_data |>
+  filter(!is.na(departure_year)) |>
+  count(departure_year) |>
+  ggplot(aes(departure_year, n)) +
+  geom_col(fill = "#2C5282") +
+  geom_vline(xintercept = 1948, linetype = "dashed") +     # dashed line at 1948
+  annotate("text", x = 1948.3, y = Inf, vjust = 1.5, hjust = 0, size = 3.5,
+           label = "1948: U.S. DP Act /\nIsraeli independence") +
+  labs(title = "Reported departure year", x = NULL, y = "Number of testimonies")
+```
+
+```{r}
+#| label: fig-policy
+# Share of testimonies that mention each policy mechanism at least once
+testimony_data |>
+  summarise(across(starts_with("policy_"), \(x) mean(x > 0))) |>   # fraction with count > 0
+  pivot_longer(everything(), names_to = "mechanism", values_to = "share") |>
+  mutate(mechanism = str_remove(mechanism, "policy_")) |>          # tidy labels
+  ggplot(aes(share, reorder(mechanism, share))) +
+  geom_col(fill = "#2C5282") +
+  scale_x_continuous(labels = scales::percent) +
+  labs(title = "Share of testimonies mentioning each policy mechanism",
+       x = "Share of testimonies", y = NULL)
+```
