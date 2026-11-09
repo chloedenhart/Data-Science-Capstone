@@ -1,0 +1,19 @@
+---
+title: "Introduction"
+format: pdf
+editor: visual
+---
+
+## Introduction
+
+The Holocaust stands as one of the most devastating atrocities in history, resulting in the systematic murder of six million Jews by Nazi Germany and its collaborators, alongside the persecution and murder of millions of other victims. Before the war, about 9.5 million Jews lived in Europe, more than 60% of the world’s Jewish population. Between 1933 and 1945, two out of every three were murdered, and by the end of the war, about 3.5 million European Jews remained. When the conflict ended in 1945, survivors were largely left without their families, homes, and belongings, and many faced continued violence when they tried to return home. By the end of 1946, roughly 250,000 Jewish survivors were living in temporary Displaced Persons (DP) camps in Germany, Austria, and Italy, while others had fled to safer countries.
+
+Survivors then faced a second set of difficult decisions: whether to stay in Europe, when to leave, and where to rebuild their lives. Historians have documented these decisions through case studies and individual accounts, but they remain largely unexamined from a quantitative perspective. Survivor testimonies offer a way to study them at scale. The USC Shoah Foundation’s Visual History Archive holds tens of thousands of interviews with survivors, far more than any researcher could read by hand. This paper builds a dataset from these testimonies, using text analysis to measure where survivors went between 1945 and 1955, what pushed them to leave and what drew them to their destinations, and whether they describe their postwar lives with fear or with hope. I hope to answer two key questions:
+
+1.  What can survivors’ testimonies tell us about where they went after the war and why? This includes the fear and threat they describe, the immigration policies and aid organizations that shaped their moves, and whether they narrate their postwar lives with hope through their language, marriage, and children.
+
+2.  How accurately can text analysis capture these experiences? I compare the measures extracted from the testimonies to my own close reading of a sample of transcripts.
+
+We are approaching one hundred years since the beginning of the Holocaust. Many survivors are no longer here to tell their stories and serve as historical ambassadors of the mass violence they faced. Soon, we will no longer be able to hear from survivors directly, and their recorded testimonies will become the primary record of what they experienced. Remembering the Holocaust is not only an act of remembrance but also a commitment to understanding the consequences of mass violence and preventing similar atrocities in the future.
+
+A quantitative approach can strengthen this effort by providing systematic evidence of how conflict and fear shape migration, a connection with significant policy implications. Recent waves of refugees fleeing conflict in Syria and Ukraine underscore the continued relevance of understanding how violence and instability drive displacement.
