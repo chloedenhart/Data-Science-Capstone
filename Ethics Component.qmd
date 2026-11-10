@@ -1,0 +1,24 @@
+---
+title: "Ethics Component"
+format: pdf
+editor: visual
+---
+
+## Ethics Component
+
+This project analyzes Holocaust survivors’ testimonies, some of the most personal records that exist. Turning these accounts into data raises several ethical challenges, which shaped how I designed the project.
+
+**1. Reducing survivors’ stories to numbers**\
+The challange is counting how often someone says “afraid” cannot capture what they lived through, and quantitative methods risk flattening individual experiences into averages. I addressed it by choosing a random 20 person sample, where I read through 20 full testimonies, and I compare the code’s results to my own reading. When the numbers and the testimony disagree, I treat the testimony as the more reliable source.
+
+**2. Judging how survivors understood their lives**\
+The challenge is labeling a testimony “optimistic” or “pessimistic” is a judgment about a person’s life. A survivor who focuses on suffering may be bearing witness, not expressing a lack of hope. I describe these measures as reflecting the language survivors used in their interviews, not their inner experience, and I do not draw conclusions about any individual from word counts alone.
+
+**3. Privacy**\
+The challeneg is interviewees are identifiable, and their testimonies mention family members and others who never chose to be part of the record. The transcripts are stored only for analysis and are never shared. The dataset I produce contains only the extracted variables, not survivors’ words, and I include only the personal details needed to understand the findings.
+
+**5. Representation and bias**\
+The testimonies do not represent all survivors. Everyone in the archive survived, lived long enough to be interviewed in the 1990s, and chose to tell their story. English-language testimonies also over-represent survivors who settled in English-speaking countries. I state these limits clearly and avoid generalizing to all survivors. I am adding non-English testimonies to broaden the sample, and I check whether the measures work equally well on translated text.
+
+**6. Accuracy and the risk of misrepresentation**\
+Automated extraction makes mistakes. In one testimony, the code built a migration path out of wartime events and later family visits. Presenting flawed data as fact could misrepresent survivors’ lives. Validation is a central part of the project. I report how accurate each variable is, label unvalidated results as preliminary, and treat the code’s errors as findings about the limits of the method rather than hiding them.
